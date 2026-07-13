@@ -1,0 +1,16 @@
+{
+  "name": "slack-automatization",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "backend",
+    "widget"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "build:backend": "npm run build -w backend",
+    "dev:widget": "npm run dev -w widget",
+    "build:widget": "npm run build -w widget",
+    "build": "npm run build:backend && npm run build:widget"
+  }
+}

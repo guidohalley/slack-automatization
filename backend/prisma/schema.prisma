@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TaskStatus {
+  pending
+  agent_running
+  pr_opened
+  done
+  failed
+}
+
+enum EventSource {
+  cursor_bot
+  client
+  system
+}
+
+// One report submitted through the client-facing widget, tracked end to end
+// from Slack thread creation through Cursor's background agent run.
+model ClientTask {
+  id             String     @id @default(uuid())
+  clientId       String
+  title          String
+  description    String
+  screenshotUrl  String?
+  slackChannelId String
+  // Unique because it is the correlation key used by the Slack Events
+  // webhook to match incoming Cursor replies back to this task.
+  slackThreadTs  String     @unique
+  repo           String
+  status         TaskStatus @default(pending)
+  prUrl          String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  events TaskEvent[]
+
+  @@index([clientId])
+}
+
+// Raw timeline of every relevant Slack message seen for a task, kept even
+// when it can't be parsed into a status change, so nothing is lost for debugging.
+model TaskEvent {
+  id        String      @id @default(uuid())
+  taskId    String
+  task      ClientTask  @relation(fields: [taskId], references: [id])
+  rawText   String
+  source    EventSource
+  createdAt DateTime    @default(now())
+
+  @@index([taskId])
+}
+
+// Static mapping from client -> Slack channel + repo. The repo a task
+// targets must always come from here, never from client-submitted input.
+model ClientRepoMap {
+  clientId       String @id
+  slackChannelId String
+  defaultRepo    String
+}
