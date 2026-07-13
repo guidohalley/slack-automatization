@@ -2,6 +2,10 @@ import { WebClient } from '@slack/web-api';
 import { env } from './env';
 
 export const slackClient = new WebClient(env.slackBotToken);
+// Cursor's Slack app silently ignores @mentions posted by other bots (no
+// reaction whatsoever, confirmed by testing). Falls back to the bot client
+// if unset, which will keep reproducing that same silence.
+export const slackUserClient = new WebClient(env.slackUserToken || env.slackBotToken);
 
 export interface InitialMessageResult {
   threadTs: string;
@@ -65,9 +69,12 @@ export async function postCursorMention(
   // <@USER_ID> syntax; plain "@Cursor" text is inert. Falls back to the
   // literal text (useful for local testing) if CURSOR_SLACK_USER_ID isn't set.
   const mention = env.cursorSlackUserId ? `<@${env.cursorSlackUserId}>` : '@Cursor';
-  const text = `${mention} [repo=${repo}] ${instruction}`;
+  // Cursor parses the repo from natural language (its own docs example:
+  // "@Cursor Fix the login bug in torvalds/linux using Composer"), not from
+  // a "[repo=...]" tag - that bracket syntax was never a real Cursor command.
+  const text = `${mention} In the ${repo} repo: ${instruction}`;
 
-  return slackClient.chat.postMessage({
+  return slackUserClient.chat.postMessage({
     channel: channelId,
     thread_ts: threadTs,
     text,

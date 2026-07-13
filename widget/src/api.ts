@@ -36,6 +36,12 @@ export async function fetchTask(apiBaseUrl: string, taskId: string): Promise<Tas
   return res.json();
 }
 
+export async function listTasks(apiBaseUrl: string, clientId: string): Promise<TaskDto[]> {
+  const res = await fetch(`${apiBaseUrl}/api/tasks?clientId=${encodeURIComponent(clientId)}`);
+  if (!res.ok) throw new Error(await parseErrorMessage(res));
+  return res.json();
+}
+
 export async function askStatus(apiBaseUrl: string, taskId: string): Promise<TaskDto> {
   const res = await fetch(`${apiBaseUrl}/api/tasks/${taskId}/ask-status`, { method: 'POST' });
   if (!res.ok) throw new Error(await parseErrorMessage(res));

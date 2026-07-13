@@ -90,7 +90,7 @@ tasksRouter.post('/', taskCreationLimiter, upload.single('screenshot'), async (r
       mapping.slackChannelId,
       threadTs,
       mapping.defaultRepo,
-      `A client reported an issue. Please investigate and fix it in the repo, then open a pull request.\n\nTitle: ${title}\nDescription: ${description}`,
+      `A client reported an issue. Please investigate and fix it, then open a pull request.\n\nTitle: ${title}\nDescription: ${description}`,
     );
     const updated = await prisma.clientTask.update({
       where: { id: task.id },
@@ -113,6 +113,22 @@ tasksRouter.post('/', taskCreationLimiter, upload.single('screenshot'), async (r
     taskUpdated(task.id);
     return res.status(201).json(toTaskDto(failed));
   }
+});
+
+// Widget-facing list: all tasks reported for a client, newest first. There's
+// no per-user identity in this system, so this is a shared list scoped only
+// by clientId (matches the "internal team issue board" use case).
+tasksRouter.get('/', async (req, res) => {
+  const { clientId } = req.query;
+  if (typeof clientId !== 'string' || !clientId.trim()) {
+    return res.status(400).json({ error: 'clientId is required' });
+  }
+
+  const tasks = await prisma.clientTask.findMany({
+    where: { clientId },
+    orderBy: { createdAt: 'desc' },
+  });
+  return res.json(tasks.map(toTaskDto));
 });
 
 tasksRouter.get('/:id', async (req, res) => {
