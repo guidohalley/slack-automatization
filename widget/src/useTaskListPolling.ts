@@ -6,7 +6,7 @@ export function useTaskListPolling(apiBaseUrl: string, clientId: string, interva
   const [tasks, setTasks] = useState<TaskDto[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const refetchNowRef = useRef<() => void>(() => {});
 
   useEffect(() => {
