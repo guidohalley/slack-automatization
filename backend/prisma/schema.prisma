@@ -34,6 +34,9 @@ model ClientTask {
   // webhook to match incoming Cursor replies back to this task.
   slackThreadTs  String     @unique
   repo           String
+  // Copied from ClientRepoMap.assigneeName at creation time (like `repo`),
+  // so a later reassignment doesn't rewrite who owned already-created tasks.
+  assigneeName   String
   status         TaskStatus @default(pending)
   prUrl          String?
   createdAt      DateTime   @default(now())
@@ -63,4 +66,7 @@ model ClientRepoMap {
   clientId       String @id
   slackChannelId String
   defaultRepo    String
+  // Who to show as "Asignada a" on tasks created for this client. Free text
+  // for now (single-developer shop) rather than a User model.
+  assigneeName   String @default("Guido Halley")
 }

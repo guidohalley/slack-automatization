@@ -77,6 +77,7 @@ tasksRouter.post('/', taskCreationLimiter, upload.single('screenshot'), async (r
       slackChannelId: mapping.slackChannelId,
       slackThreadTs: threadTs,
       repo: mapping.defaultRepo,
+      assigneeName: mapping.assigneeName,
       status: 'pending',
     },
   });

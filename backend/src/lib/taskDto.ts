@@ -7,6 +7,7 @@ export interface TaskDto {
   id: string;
   title: string;
   description: string;
+  assigneeName: string;
   status: ClientTask['status'];
   prUrl: string | null;
   createdAt: string;
@@ -18,6 +19,7 @@ export function toTaskDto(task: ClientTask): TaskDto {
     id: task.id,
     title: task.title,
     description: task.description,
+    assigneeName: task.assigneeName,
     status: task.status,
     prUrl: task.prUrl,
     createdAt: task.createdAt.toISOString(),

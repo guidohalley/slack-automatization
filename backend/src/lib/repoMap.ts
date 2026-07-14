@@ -3,6 +3,7 @@ import { prisma } from './prisma';
 export interface ClientRepoMapping {
   slackChannelId: string;
   defaultRepo: string;
+  assigneeName: string;
 }
 
 // The repo and channel a task targets always come from this table, keyed by
@@ -11,5 +12,9 @@ export interface ClientRepoMapping {
 export async function getClientRepoMapping(clientId: string): Promise<ClientRepoMapping | null> {
   const mapping = await prisma.clientRepoMap.findUnique({ where: { clientId } });
   if (!mapping) return null;
-  return { slackChannelId: mapping.slackChannelId, defaultRepo: mapping.defaultRepo };
+  return {
+    slackChannelId: mapping.slackChannelId,
+    defaultRepo: mapping.defaultRepo,
+    assigneeName: mapping.assigneeName,
+  };
 }
