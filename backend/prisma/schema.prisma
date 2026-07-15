@@ -37,6 +37,9 @@ model ClientTask {
   // Copied from ClientRepoMap.assigneeName at creation time (like `repo`),
   // so a later reassignment doesn't rewrite who owned already-created tasks.
   assigneeName   String
+  // Who submitted the request, if the embedding system has a logged-in user
+  // to tell us (optional - not every embedding has auth wired up).
+  reporterName   String?
   status         TaskStatus @default(pending)
   prUrl          String?
   createdAt      DateTime   @default(now())

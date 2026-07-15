@@ -13,6 +13,7 @@ export interface CreateTaskParams {
   clientId: string;
   title: string;
   description: string;
+  reporterName?: string | null;
   screenshot?: File | null;
 }
 
@@ -21,6 +22,9 @@ export async function createTask(apiBaseUrl: string, params: CreateTaskParams): 
   form.set('clientId', params.clientId);
   form.set('title', params.title);
   form.set('description', params.description);
+  if (params.reporterName) {
+    form.set('reporterName', params.reporterName);
+  }
   if (params.screenshot) {
     form.set('screenshot', params.screenshot);
   }

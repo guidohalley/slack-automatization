@@ -15,14 +15,16 @@ export async function postInitialMessage(
   channelId: string,
   title: string,
   description: string,
+  reporterName: string | null,
 ): Promise<InitialMessageResult> {
+  const reportedBy = reporterName ? `\n_Reportado por ${reporterName}_` : '';
   const result = await slackClient.chat.postMessage({
     channel: channelId,
     text: `Nueva tarea de cliente: ${title}`,
     blocks: [
       {
         type: 'section',
-        text: { type: 'mrkdwn', text: `*${title}*\n${description}` },
+        text: { type: 'mrkdwn', text: `*${title}*\n${description}${reportedBy}` },
       },
     ],
   });

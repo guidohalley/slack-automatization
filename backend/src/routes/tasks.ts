@@ -25,7 +25,7 @@ const taskCreationLimiter = rateLimit({
 });
 
 tasksRouter.post('/', taskCreationLimiter, upload.single('screenshot'), async (req, res) => {
-  const { clientId, title, description } = req.body as Record<string, unknown>;
+  const { clientId, title, description, reporterName } = req.body as Record<string, unknown>;
 
   if (typeof clientId !== 'string' || !clientId.trim()) {
     return res.status(400).json({ error: 'clientId is required' });
@@ -36,6 +36,10 @@ tasksRouter.post('/', taskCreationLimiter, upload.single('screenshot'), async (r
   if (typeof description !== 'string' || !description.trim()) {
     return res.status(400).json({ error: 'description is required' });
   }
+  // Optional: only present when the embedding system has a logged-in user
+  // to tell us. Never trusted for anything beyond display.
+  const reporter =
+    typeof reporterName === 'string' && reporterName.trim() ? reporterName.trim().slice(0, 200) : null;
 
   // repo/channel always come from the internal mapping, never from the form.
   const mapping = await getClientRepoMapping(clientId);
@@ -45,7 +49,7 @@ tasksRouter.post('/', taskCreationLimiter, upload.single('screenshot'), async (r
 
   let threadTs: string;
   try {
-    const initial = await postInitialMessage(mapping.slackChannelId, title, description);
+    const initial = await postInitialMessage(mapping.slackChannelId, title, description, reporter);
     threadTs = initial.threadTs;
   } catch (err) {
     console.error('[tasks] failed to post initial Slack message', err);
@@ -78,6 +82,7 @@ tasksRouter.post('/', taskCreationLimiter, upload.single('screenshot'), async (r
       slackThreadTs: threadTs,
       repo: mapping.defaultRepo,
       assigneeName: mapping.assigneeName,
+      reporterName: reporter,
       status: 'pending',
     },
   });

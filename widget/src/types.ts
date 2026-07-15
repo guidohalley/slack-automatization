@@ -5,6 +5,7 @@ export interface TaskDto {
   title: string;
   description: string;
   assigneeName: string;
+  reporterName: string | null;
   status: TaskStatus;
   prUrl: string | null;
   createdAt: string;

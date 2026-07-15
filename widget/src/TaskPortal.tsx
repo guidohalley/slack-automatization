@@ -9,6 +9,8 @@ export interface TaskPortalProps {
   apiBaseUrl: string;
   /** Identifies which client/project this widget instance belongs to. */
   clientId: string;
+  /** Logged-in user's name/email, if the embedding system has one. Shown as "Reportado por". */
+  reporterName?: string | null;
   theme?: TaskPortalTheme;
   /** Polling interval for the task list. */
   pollIntervalMs?: number;
@@ -52,7 +54,13 @@ function MisionaryMark() {
   );
 }
 
-export function TaskPortal({ apiBaseUrl, clientId, theme, pollIntervalMs = 10000 }: TaskPortalProps) {
+export function TaskPortal({
+  apiBaseUrl,
+  clientId,
+  reporterName,
+  theme,
+  pollIntervalMs = 10000,
+}: TaskPortalProps) {
   const mergedTheme = { ...DEFAULT_THEME, ...theme };
 
   const { tasks, error: listError, loaded, refetch } = useTaskListPolling(apiBaseUrl, clientId, pollIntervalMs);
@@ -80,7 +88,7 @@ export function TaskPortal({ apiBaseUrl, clientId, theme, pollIntervalMs = 10000
     setSubmitting(true);
     setSubmitError(null);
     try {
-      await createTask(apiBaseUrl, { clientId, title, description, screenshot });
+      await createTask(apiBaseUrl, { clientId, title, description, reporterName, screenshot });
       setTitle('');
       setDescription('');
       setScreenshot(null);
@@ -205,6 +213,11 @@ function TaskListItem({
         </span>
       </div>
       <p className="mtp-assignee">
+        {task.reporterName && (
+          <>
+            Reportado por <strong>{task.reporterName}</strong> ·{' '}
+          </>
+        )}
         Asignada a <strong>{task.assigneeName}</strong>
       </p>
       <p className="mtp-description">{STATUS_DESCRIPTIONS[task.status]}</p>
